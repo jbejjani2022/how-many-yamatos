@@ -166,7 +166,7 @@
             const taftChecked = document.getElementById('taft-checkbox').checked;
             const hasExtras = saschaChecked || taftChecked;
             
-            const extraText = hasExtras ? ' + ?' : '';
+            const extraText = '';
             document.getElementById('dollar-display').textContent = '$' + amount + cents + extraText;
         }
         

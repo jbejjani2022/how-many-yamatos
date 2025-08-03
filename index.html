@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Many Yamatos?</title>
+    <style>
+        body {
+            background-color: white;
+            color: black;
+            font-family: serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 40px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .slider-container {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .slider {
+            width: 200px;
+        }
+        
+        .digit-display {
+            font-size: 2em;
+            font-weight: bold;
+            min-width: 40px;
+        }
+        
+        
+        select {
+            font-family: serif;
+            font-size: 1.1em;
+            padding: 5px;
+            margin: 10px;
+        }
+        
+        .cents-section {
+            margin: 20px 0;
+        }
+        
+        .result {
+            margin-top: 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .dollar-amount {
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>How many Yamatos?</h1>
+        
+        <p style="font-size: 1.5em;">your bank balance:</p>
+        
+        <div id="sliders-container">
+            <div class="slider-container">
+                <input type="range" class="slider" min="0" max="8" value="0" data-digit="0" data-first="true">
+                <span class="digit-display">1</span>
+            </div>
+        </div>
+        
+        <button id="add-digit" style="font-size: 1.2em;">add digit?</button>
+        
+        <div class="cents-section">
+            <button id="add-cents" style="font-size: 1.2em;">add cents?</button>
+            <div id="cents-container" style="display: none;">
+                <label>Cents: </label>
+                <select id="cents-select">
+                    <option value="0">Select cents...</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <label><input type="checkbox" id="sascha-checkbox"> Sascha present?</label><br>
+            <label><input type="checkbox" id="taft-checkbox"> Taft in attendance?</label>
+        </div>
+        
+        <div class="dollar-amount" id="dollar-display">$1</div>
+        
+        <button id="convert" style="font-size: 1.4em;">CONVERT TO YAMATOS</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const firstDigitOrder = [1, 7, 3, 9, 2, 6, 4, 8, 5];
+        const digitOrder = [3, 8, 1, 6, 0, 9, 4, 2, 7, 5];
+        
+        let digitCount = 1;
+        let hasCents = false;
+        let centsValues = [];
+        
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        function createCentsOptions() {
+            centsValues = shuffleArray(Array.from({length: 100}, (_, i) => i));
+            const select = document.getElementById('cents-select');
+            select.innerHTML = '<option value="">Select cents...</option>';
+            centsValues.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value.toString().padStart(2, '0');
+                select.appendChild(option);
+            });
+        }
+        
+        function updateDigitDisplay(slider) {
+            const isFirst = slider.dataset.first === 'true';
+            const order = isFirst ? firstDigitOrder : digitOrder;
+            const value = parseInt(slider.value);
+            const display = slider.parentElement.querySelector('.digit-display');
+            display.textContent = order[value];
+        }
+        
+        function updateDollarDisplay() {
+            let amount = '';
+            const sliders = document.querySelectorAll('.slider');
+            sliders.forEach(slider => {
+                const isFirst = slider.dataset.first === 'true';
+                const order = isFirst ? firstDigitOrder : digitOrder;
+                const value = parseInt(slider.value);
+                amount += order[value];
+            });
+            
+            let cents = '';
+            if (hasCents) {
+                const centsSelect = document.getElementById('cents-select');
+                if (centsSelect.value !== '') {
+                    cents = '.' + centsSelect.value.toString().padStart(2, '0');
+                }
+            }
+            
+            const saschaChecked = document.getElementById('sascha-checkbox').checked;
+            const taftChecked = document.getElementById('taft-checkbox').checked;
+            const hasExtras = saschaChecked || taftChecked;
+            
+            const extraText = hasExtras ? ' + ?' : '';
+            document.getElementById('dollar-display').textContent = '$' + amount + cents + extraText;
+        }
+        
+        document.getElementById('add-digit').addEventListener('click', () => {
+            digitCount++;
+            const container = document.getElementById('sliders-container');
+            const sliderDiv = document.createElement('div');
+            sliderDiv.className = 'slider-container';
+            sliderDiv.innerHTML = `
+                <input type="range" class="slider" min="0" max="9" value="0" data-digit="${digitCount - 1}">
+                <span class="digit-display">3</span>
+            `;
+            container.appendChild(sliderDiv);
+            
+            const newSlider = sliderDiv.querySelector('.slider');
+            newSlider.addEventListener('input', (e) => {
+                updateDigitDisplay(e.target);
+                updateDollarDisplay();
+            });
+            
+            updateDollarDisplay();
+        });
+        
+        document.getElementById('add-cents').addEventListener('click', () => {
+            if (!hasCents) {
+                hasCents = true;
+                createCentsOptions();
+                document.getElementById('cents-container').style.display = 'block';
+                document.getElementById('add-cents').textContent = 'remove cents?';
+            } else {
+                hasCents = false;
+                document.getElementById('cents-container').style.display = 'none';
+                document.getElementById('add-cents').textContent = 'add cents?';
+            }
+            updateDollarDisplay();
+        });
+        
+        document.getElementById('cents-select').addEventListener('change', updateDollarDisplay);
+        
+        document.getElementById('sascha-checkbox').addEventListener('change', updateDollarDisplay);
+        document.getElementById('taft-checkbox').addEventListener('change', updateDollarDisplay);
+        
+        document.getElementById('convert').addEventListener('click', () => {
+            const feet = prompt("How many feet tall are you?");
+            
+            if (feet === null || feet === '') {
+                return;
+            }
+            
+            const feetNum = parseInt(feet);
+            
+            if (isNaN(feetNum) || feetNum < 0) {
+                alert("Please enter a valid number of feet.");
+                return;
+            }
+            
+            const inches = prompt("How many additional inches?");
+            
+            if (inches === null || inches === '') {
+                return;
+            }
+            
+            const inchesNum = parseInt(inches);
+            
+            if (isNaN(inchesNum) || inchesNum < 0 || inchesNum >= 12) {
+                alert("Please enter a valid number of inches (0-11).");
+                return;
+            }
+            
+            const heightInFeet = feetNum + (inchesNum / 12);
+            
+            let amount = '';
+            const sliders = document.querySelectorAll('.slider');
+            sliders.forEach(slider => {
+                const isFirst = slider.dataset.first === 'true';
+                const order = isFirst ? firstDigitOrder : digitOrder;
+                const value = parseInt(slider.value);
+                amount += order[value];
+            });
+            
+            let totalAmount = parseFloat(amount);
+            
+            if (hasCents) {
+                const centsSelect = document.getElementById('cents-select');
+                if (centsSelect.value !== '') {
+                    totalAmount += parseFloat(centsSelect.value) / 100;
+                }
+            }
+            
+            const saschaChecked = document.getElementById('sascha-checkbox').checked;
+            const taftChecked = document.getElementById('taft-checkbox').checked;
+            
+            if (saschaChecked) totalAmount += 25;
+            if (taftChecked) totalAmount += 25;
+            
+            const currentDay = new Date().getDay();
+            const isFridayOrSaturday = currentDay === 5 || currentDay === 6;
+            
+            let divisor;
+            let resultText;
+            
+            if (heightInFeet < 3) {
+                resultText = "You have infinite Yamatos";
+            } else if (heightInFeet >= 3 && heightInFeet < 4) {
+                const basePrice = isFridayOrSaturday ? 11.475 : 10.475;
+                divisor = basePrice * 1.07 + basePrice * 0.18;
+                const yamatos = totalAmount / divisor;
+                resultText = `You have ${yamatos.toFixed(4)} Yamatos`;
+            } else if (heightInFeet >= 4 && heightInFeet <= 5) {
+                const basePrice = isFridayOrSaturday ? 22.95 : 20.95;
+                divisor = basePrice * 1.07 + basePrice * 0.18;
+                const yamatos = totalAmount / divisor;
+                resultText = `You have ${yamatos.toFixed(4)} Yamatos`;
+            } else {
+                const basePrice = isFridayOrSaturday ? 37.99 : 35.99;
+                divisor = basePrice * 1.07 + basePrice * 0.18;
+                const yamatos = totalAmount / divisor;
+                resultText = `You have ${yamatos.toFixed(4)} Yamatos`;
+            }
+            
+            let countdown = 5;
+            let isFirstCountdown = true;
+            const resultDiv = document.getElementById('result');
+            
+            function updateCountdown() {
+                if (countdown > 1) {
+                    const message = isFirstCountdown ? 'Calculating your Yamatos' : '...crunching numbers...';
+                    resultDiv.innerHTML = `${message}<br>${countdown}`;
+                    countdown--;
+                    setTimeout(updateCountdown, 1000);
+                } else {
+                    if (isFirstCountdown) {
+                        isFirstCountdown = false;
+                        countdown = 5;
+                        updateCountdown();
+                    } else {
+                        resultDiv.textContent = resultText;
+                    }
+                }
+            }
+            
+            updateCountdown();
+        });
+        
+        document.querySelector('.slider').addEventListener('input', (e) => {
+            updateDigitDisplay(e.target);
+            updateDollarDisplay();
+        });
+        
+        updateDollarDisplay();
+    </script>
+</body>
+</html>

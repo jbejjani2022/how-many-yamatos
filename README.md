@@ -1,3 +1,3 @@
-# How Many Yamatos
+# How many Yamatos?
 
 Convert USD to Yamato units.

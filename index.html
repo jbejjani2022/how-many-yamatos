@@ -416,8 +416,8 @@
         
         <div id="sliders-container">
             <div class="slider-container">
-                <input type="range" class="slider" min="0" max="8" value="0" data-digit="0" data-first="true">
-                <span class="digit-display">1</span>
+                <input type="range" class="slider" min="0" max="9" value="0" data-digit="0" data-first="true">
+                <span class="digit-display" id="first-digit-display">0</span>
             </div>
         </div>
         
@@ -473,8 +473,19 @@
     </div>
 
     <script>
-        const firstDigitOrder = [1, 7, 3, 9, 2, 6, 4, 8, 5];
-        const digitOrder = [3, 8, 1, 6, 0, 9, 4, 2, 7, 5];
+        // Generate randomized digit orders that include 0 for all sliders
+        let firstDigitOrder = [];
+        let digitOrder = [];
+        
+        function generateRandomizedDigitOrder() {
+            // All sliders now include 0-9, shuffled randomly
+            const allDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            firstDigitOrder = shuffleArray([...allDigits]);
+            digitOrder = shuffleArray([...allDigits]);
+        }
+        
+        // Initialize randomized orders
+        generateRandomizedDigitOrder();
         
         let digitCount = 1;
         let hasCents = false;
@@ -1217,7 +1228,7 @@
             sliderDiv.className = 'slider-container';
             sliderDiv.innerHTML = `
                 <input type="range" class="slider" min="0" max="9" value="0" data-digit="${digitCount - 1}">
-                <span class="digit-display">3</span>
+                <span class="digit-display">${digitOrder[0]}</span>
             `;
             container.appendChild(sliderDiv);
             
@@ -1456,12 +1467,23 @@
             }
         });
         
+        // Initialize the first slider display
+        function initializeSliders() {
+            const firstSlider = document.querySelector('.slider[data-first="true"]');
+            const firstDisplay = document.getElementById('first-digit-display');
+            if (firstSlider && firstDisplay) {
+                firstDisplay.textContent = firstDigitOrder[0]; // Show the first value in randomized order
+                updateDollarDisplay();
+            }
+        }
+
         document.querySelector('.slider').addEventListener('input', (e) => {
             updateDigitDisplay(e.target);
             updateDollarDisplay();
         });
         
-        updateDollarDisplay();
+        // Initialize sliders after randomization
+        initializeSliders();
 
         // Test scenarios for verification (run in console)
         window.testScenarios = function() {

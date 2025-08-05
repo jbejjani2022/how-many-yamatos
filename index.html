@@ -366,7 +366,7 @@
         /* Bouncing Yamato styles */
         .bouncing-yamato {
             position: fixed;
-            font-size: 3em;
+            font-size: 2em;
             font-weight: bold;
             color: #0066cc;
             text-decoration: underline;
@@ -1513,7 +1513,7 @@
 
         // Physics properties
         let position = { x: 0, y: 0 };
-        let velocity = { x: 3, y: 2 };
+        let velocity = { x: 4, y: 3 };
         let elementSize = { width: 0, height: 0 };
 
         function createBouncingYamato() {
@@ -1526,9 +1526,15 @@
             bouncingYamato.textContent = 'Yamato';
             bouncingYamato.className = 'bouncing-yamato';
             
-            // Start position at center of viewport
-            position.x = window.innerWidth / 2;
-            position.y = window.innerHeight / 2;
+            // Random starting position (avoid edges to prevent immediate bouncing)
+            position.x = Math.random() * (window.innerWidth * 0.6) + (window.innerWidth * 0.2);
+            position.y = Math.random() * (window.innerHeight * 0.6) + (window.innerHeight * 0.2);
+            
+            // Random velocity direction while maintaining speed
+            const baseSpeed = 4;
+            const angle = Math.random() * 2 * Math.PI; // Random angle in radians
+            velocity.x = Math.cos(angle) * baseSpeed;
+            velocity.y = Math.sin(angle) * baseSpeed;
             
             bouncingYamato.style.left = position.x + 'px';
             bouncingYamato.style.top = position.y + 'px';

@@ -379,6 +379,33 @@
         .bouncing-yamato:hover {
             color: #0052a3;
         }
+
+        /* Sushi roll rain animation styles */
+        .sushi-roll {
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            z-index: 1500;
+            pointer-events: none;
+            background-image: url('static/sushi.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        @media (max-width: 768px) {
+            .sushi-roll {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sushi-roll {
+                width: 80px;
+                height: 80px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1368,9 +1395,11 @@
             const priceResult = calculateYamatoPrice(selectedDate, selectedTime, heightInFeet, saschaChecked, taftChecked);
             
             let resultText;
+            let yamatoUnits = 0;
             if (priceResult.isInfinite) {
                 console.log("Result: INFINITE YAMATOS (height < 3 feet)");
                 resultText = "You have infinite Yamatos";
+                yamatoUnits = Infinity;
             } else {
                 console.log("=== FINAL DIVISION ===");
                 console.log("Bank balance: $" + totalAmount.toFixed(2));
@@ -1378,6 +1407,7 @@
                 console.log("Division: " + totalAmount.toFixed(2) + " ÷ " + priceResult.finalPrice.toFixed(2));
                 
                 const yamatos = totalAmount / priceResult.finalPrice;
+                yamatoUnits = yamatos;
                 console.log("Result: " + yamatos.toFixed(4) + " Yamatos");
                 
                 resultText = `You have ${yamatos.toFixed(4)} Yamatos`;
@@ -1396,6 +1426,16 @@
                     setTimeout(secondCountdown, 1000);
                 } else {
                     resultDiv.textContent = resultText;
+                    
+                    // Trigger sushi rain animation after result is displayed
+                    setTimeout(() => {
+                        if (yamatoUnits === Infinity) {
+                            // For infinite Yamatos, use maximum sushi count
+                            startSushiRain(100); // This will create 100 sushi (the cap)
+                        } else {
+                            startSushiRain(yamatoUnits);
+                        }
+                    }, 500); // Small delay after result appears for better UX
                 }
             }
             
@@ -1610,6 +1650,103 @@
                 position.y = Math.min(position.y, window.innerHeight - elementSize.height);
             }
         });
+
+        // Sushi Roll Rain Animation System
+        let activeSushiRolls = [];
+        let sushiAnimationId = null;
+        let sushiSpawnTimeouts = [];
+
+        function calculateSushiCount(yamatoUnits) {
+            if (yamatoUnits < 1) return 0;
+            return Math.min(Math.round(yamatoUnits * 10), 100);
+        }
+
+        function createSushiRoll() {
+            const sushiRoll = document.createElement('div');
+            sushiRoll.className = 'sushi-roll';
+            
+            // Random horizontal spawn position
+            const x = Math.random() * (window.innerWidth - 120); // 120px is sushi width
+            const y = -50; // Start above viewport
+            
+            sushiRoll.style.left = x + 'px';
+            sushiRoll.style.top = y + 'px';
+            
+            // Add physics properties
+            sushiRoll.yamatoY = y;
+            sushiRoll.yamatoVelocity = 2 + Math.random() * 2; // Random fall speed 2-4px per frame
+            sushiRoll.yamatoRotation = Math.random() * 360; // Random initial rotation
+            sushiRoll.yamatoRotationSpeed = (Math.random() - 0.5) * 4; // Random rotation speed
+            
+            document.body.appendChild(sushiRoll);
+            activeSushiRolls.push(sushiRoll);
+        }
+
+        function animateSushiRolls() {
+            if (activeSushiRolls.length === 0) {
+                sushiAnimationId = null;
+                return;
+            }
+
+            for (let i = activeSushiRolls.length - 1; i >= 0; i--) {
+                const sushi = activeSushiRolls[i];
+                
+                // Update position
+                sushi.yamatoY += sushi.yamatoVelocity;
+                sushi.yamatoRotation += sushi.yamatoRotationSpeed;
+                
+                // Apply transforms
+                sushi.style.top = sushi.yamatoY + 'px';
+                sushi.style.transform = `rotate(${sushi.yamatoRotation}deg)`;
+                
+                // Remove if off screen
+                if (sushi.yamatoY > window.innerHeight + 50) {
+                    sushi.remove();
+                    activeSushiRolls.splice(i, 1);
+                }
+            }
+
+            sushiAnimationId = requestAnimationFrame(animateSushiRolls);
+        }
+
+        function startSushiRain(yamatoUnits) {
+            const sushiCount = calculateSushiCount(yamatoUnits);
+            
+            if (sushiCount === 0) return;
+
+            // Clear any existing animation
+            stopSushiRain();
+
+            // Staggered spawn timing
+            for (let i = 0; i < sushiCount; i++) {
+                const timeout = setTimeout(() => {
+                    createSushiRoll();
+                    
+                    // Start animation with first sushi
+                    if (i === 0 && !sushiAnimationId) {
+                        animateSushiRolls();
+                    }
+                }, i * 100); // 100ms delay between each sushi
+                
+                sushiSpawnTimeouts.push(timeout);
+            }
+        }
+
+        function stopSushiRain() {
+            // Clear spawn timeouts
+            sushiSpawnTimeouts.forEach(timeout => clearTimeout(timeout));
+            sushiSpawnTimeouts = [];
+            
+            // Cancel animation
+            if (sushiAnimationId) {
+                cancelAnimationFrame(sushiAnimationId);
+                sushiAnimationId = null;
+            }
+            
+            // Remove existing sushi rolls
+            activeSushiRolls.forEach(sushi => sushi.remove());
+            activeSushiRolls = [];
+        }
     </script>
 </body>
 </html>

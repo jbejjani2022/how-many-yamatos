@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>How Many Yamatos?</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         body {
             background-color: white;
@@ -68,6 +69,299 @@
             font-size: 1.3em;
             margin: 20px 0;
         }
+
+        /* Modal System Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            font-family: serif;
+        }
+
+        .modal-content h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: black;
+        }
+
+        .modal-content p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        /* 3D Earth Time Selection Styles */
+        .earth-container {
+            margin: 30px auto;
+            width: 300px;
+            height: 300px;
+            position: relative;
+        }
+
+        #earth-3d-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            cursor: grab;
+        }
+
+        #earth-3d-container:active {
+            cursor: grabbing;
+        }
+
+        .time-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #333;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Solar System Styles */
+        .solar-system {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            margin: 40px auto 30px auto;
+        }
+
+        /* Date display positioning - moved below solar system */
+        #date-modal .date-display {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sun {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffcc00, #ff9900);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.6);
+        }
+
+        .orbit-path {
+            border: 2px dashed #ccc;
+            border-radius: 50%;
+            width: 300px;
+            height: 300px;
+            position: absolute;
+            top: 50px;
+            left: 50px;
+        }
+
+        .earth-orbit {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            top: 35px;
+            left: 185px;
+            cursor: grab;
+        }
+
+        .earth-orbit:active {
+            cursor: grabbing;
+        }
+
+        .earth-icon {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4a90e2, #7fcdcd);
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .date-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #333;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Confirm button styling - bigger buttons with more spacing */
+        #confirm-time, #confirm-date {
+            margin-top: 50px;
+            font-family: serif;
+            padding: 12px 24px;
+            font-size: 1.2em;
+        }
+
+        /* Extra spacing for time display in time modal */
+        #time-modal .time-display {
+            margin-bottom: 20px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 30px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+                margin: 10px;
+                max-width: 95%;
+                width: 95%;
+            }
+            
+            .modal-content h2 {
+                font-size: 2em;
+                margin-bottom: 15px;
+            }
+            
+            .earth-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            #earth-3d-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .time-display, .date-display {
+                font-size: 1.8em;
+                margin-top: 15px;
+            }
+            
+            .solar-system {
+                width: 320px;
+                height: 320px;
+                margin: 30px auto 20px auto;
+            }
+            
+            .orbit-path {
+                width: 240px;
+                height: 240px;
+                top: 40px;
+                left: 40px;
+            }
+            
+            .earth-orbit {
+                top: 25px;
+                left: 160px;
+            }
+            
+            #confirm-time, #confirm-date {
+                padding: 15px 25px;
+                font-size: 1.1em;
+            }
+            
+            .slider-container {
+                margin: 15px 0;
+                gap: 8px;
+            }
+            
+            .slider {
+                width: 150px;
+            }
+            
+            .digit-display {
+                font-size: 1.8em;
+                min-width: 35px;
+            }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+                margin-bottom: 20px;
+            }
+            
+            .modal-content {
+                padding: 10px;
+                margin: 5px;
+            }
+            
+            .modal-content h2 {
+                font-size: 1.8em;
+            }
+            
+            .earth-container {
+                width: 240px;
+                height: 240px;
+            }
+            
+            #earth-3d-container {
+                width: 240px;
+                height: 240px;
+            }
+            
+            .time-display, .date-display {
+                font-size: 1.6em;
+            }
+            
+            .solar-system {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .orbit-path {
+                width: 210px;
+                height: 210px;
+                top: 35px;
+                left: 35px;
+            }
+            
+            .earth-orbit {
+                top: 20px;
+                left: 140px;
+            }
+            
+            #confirm-time, #confirm-date {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            
+            .slider {
+                width: 120px;
+            }
+            
+            .digit-display {
+                font-size: 1.6em;
+                min-width: 30px;
+            }
+            
+            .dollar-amount {
+                font-size: 1.2em;
+            }
+            
+            .result {
+                font-size: 1.3em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -107,6 +401,33 @@
         <div class="result" id="result"></div>
     </div>
 
+    <!-- Modal System for Date/Time Selection -->
+    <div id="modal-backdrop" class="modal-backdrop" style="display: none;">
+        <!-- Time Selection Modal -->
+        <div id="time-modal" class="modal-content" style="display: none;">
+            <h2>What time is it?</h2>
+            <div class="earth-container">
+                <div id="earth-3d-container"></div>
+                <div class="time-display" id="time-display">12:00 AM</div>
+            </div>
+            <button id="confirm-time">Confirm Time</button>
+        </div>
+
+        <!-- Date Selection Modal -->
+        <div id="date-modal" class="modal-content" style="display: none;">
+            <h2>What day is it?</h2>
+            <div class="solar-system">
+                <div class="sun"></div>
+                <div class="orbit-path"></div>
+                <div class="earth-orbit" id="earth-date">
+                    <div class="earth-icon"></div>
+                </div>
+            </div>
+            <div class="date-display" id="date-display">January 1</div>
+            <button id="confirm-date">Confirm Date</button>
+        </div>
+    </div>
+
     <script>
         const firstDigitOrder = [1, 7, 3, 9, 2, 6, 4, 8, 5];
         const digitOrder = [3, 8, 1, 6, 0, 9, 4, 2, 7, 5];
@@ -114,6 +435,681 @@
         let digitCount = 1;
         let hasCents = false;
         let centsValues = [];
+
+        // State management for date/time selection
+        let selectedTime = null; // { hours: 0-23, minutes: 0-59 }
+        let selectedDate = null; // { month: 1-12, day: 1-31, dayOfWeek: 0-6 }
+        let currentModalStep = null; // 'time', 'date', or null
+        let earthRotationAngle = 0; // Current rotation angle of Earth (0-360)
+        let earthOrbitAngle = 0; // Current orbital position (0-360)
+        let heightInFeet = 0; // Store height for later use
+
+        // Time calculation functions
+        function calculateTimeFromRotation(rotationDegrees) {
+            // Normalize rotation to 0-360 range
+            const normalizedRotation = ((rotationDegrees % 360) + 360) % 360;
+            
+            // Map 360° rotation to 24 hours (15° per hour)
+            const totalMinutes = Math.floor((normalizedRotation / 360) * 24 * 60);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = Math.floor((totalMinutes % 60) / 15) * 15; // Round to 15-minute increments
+            
+            return { hours: hours % 24, minutes };
+        }
+
+        function formatTime(timeObj) {
+            if (!timeObj) return "12:00 AM";
+            
+            const { hours, minutes } = timeObj;
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
+            const displayMinutes = minutes.toString().padStart(2, '0');
+            
+            return `${displayHours}:${displayMinutes} ${period}`;
+        }
+
+        function updateTimeDisplay() {
+            const timeObj = calculateTimeFromRotation(earthRotationAngle);
+            selectedTime = timeObj;
+            const timeDisplay = document.getElementById('time-display');
+            if (timeDisplay) {
+                timeDisplay.textContent = formatTime(timeObj);
+            }
+        }
+
+        // 3D Earth with Three.js
+        let earthScene, earthCamera, earthRenderer, earthMesh, cloudsMesh;
+        let isDragging = false;
+        let startX = 0;
+        let startAngle = 0;
+        let animationId = null; // Track animation frame
+
+        function initializeEarthRotation() {
+            const container = document.getElementById('earth-3d-container');
+            if (!container) return;
+
+            // Create Three.js scene
+            earthScene = new THREE.Scene();
+            earthCamera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            earthRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            
+            // Responsive sizing
+            const isSmallMobile = window.innerWidth <= 480;
+            const isMobile = window.innerWidth <= 768;
+            let size = 300; // Desktop default
+            if (isSmallMobile) {
+                size = 240;
+            } else if (isMobile) {
+                size = 280;
+            }
+            earthRenderer.setSize(size, size);
+            earthRenderer.shadowMap.enabled = true;
+            earthRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(earthRenderer.domElement);
+
+            // Create Earth geometry
+            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+            
+            // Create Earth material with texture-like patterns using gradients
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                color: 0x4a90e2,
+                map: createEarthTexture(),
+                shininess: 30,
+                transparent: false
+            });
+
+            earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+            earthMesh.castShadow = true;
+            earthMesh.receiveShadow = true;
+            earthScene.add(earthMesh);
+
+            // Create clouds layer
+            const cloudsGeometry = new THREE.SphereGeometry(1.01, 32, 32);
+            const cloudsMaterial = new THREE.MeshPhongMaterial({
+                map: createCloudsTexture(),
+                transparent: true,
+                opacity: 0.3,
+                depthWrite: false
+            });
+            
+            cloudsMesh = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
+            earthScene.add(cloudsMesh);
+
+            // Add atmospheric glow
+            const atmosphereGeometry = new THREE.SphereGeometry(1.05, 32, 32);
+            const atmosphereMaterial = new THREE.MeshBasicMaterial({
+                color: 0x87ceeb,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.BackSide
+            });
+            const atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+            earthScene.add(atmosphereMesh);
+
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            earthScene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 3, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            earthScene.add(directionalLight);
+
+            // Position camera
+            earthCamera.position.z = 3;
+
+            // Interaction handlers
+            function getClientX(event) {
+                return event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
+            }
+            
+            function startDrag(event) {
+                event.preventDefault();
+                isDragging = true;
+                startX = getClientX(event);
+                startAngle = earthRotationAngle;
+                container.style.cursor = 'grabbing';
+            }
+            
+            function handleDrag(event) {
+                if (!isDragging) return;
+                event.preventDefault();
+                
+                const currentX = getClientX(event);
+                const deltaX = currentX - startX;
+                
+                // Convert horizontal movement to rotation (convert to degrees for time calculation)
+                earthRotationAngle = startAngle + (deltaX * 0.5); // Back to degrees for time calculation
+                
+                // Update Earth rotation (convert degrees to radians for Three.js)
+                const rotationInRadians = (earthRotationAngle * Math.PI) / 180;
+                earthMesh.rotation.y = rotationInRadians;
+                // Rotate clouds slightly slower for realism
+                cloudsMesh.rotation.y = rotationInRadians * 0.95;
+                
+                // Update time display
+                updateTimeDisplay();
+            }
+            
+            function stopDrag() {
+                isDragging = false;
+                container.style.cursor = 'grab';
+            }
+            
+            // Event listeners
+            container.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', stopDrag);
+            container.addEventListener('touchstart', startDrag);
+            document.addEventListener('touchmove', handleDrag);
+            document.addEventListener('touchend', stopDrag);
+
+            // Animation loop
+            function animate() {
+                // Check if renderer still exists before continuing
+                if (!earthRenderer || !earthScene || !earthCamera) {
+                    return; // Stop animation if components are disposed
+                }
+                
+                animationId = requestAnimationFrame(animate);
+                
+                // Very slow automatic rotation when not being dragged
+                if (!isDragging && earthMesh && cloudsMesh) {
+                    earthRotationAngle += 0.05; // Much slower rotation in degrees
+                    const rotationInRadians = (earthRotationAngle * Math.PI) / 180;
+                    earthMesh.rotation.y = rotationInRadians;
+                    cloudsMesh.rotation.y = rotationInRadians * 0.95; // Clouds slightly slower
+                    
+                    // Update time display as Earth rotates automatically
+                    updateTimeDisplay();
+                }
+                
+                earthRenderer.render(earthScene, earthCamera);
+            }
+            animate();
+
+            // Initialize display
+            updateTimeDisplay();
+        }
+
+        // Create realistic Earth texture
+        function createEarthTexture() {
+            // Try to load a real Earth texture, fallback to improved procedural
+            const loader = new THREE.TextureLoader();
+            
+            // Use NASA's Blue Marble texture (public domain)
+            const earthTexture = loader.load(
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Land_ocean_ice_cloud_1024.jpg/1024px-Land_ocean_ice_cloud_1024.jpg',
+                function(texture) {
+                    console.log('Earth texture loaded successfully');
+                },
+                function(progress) {
+                    console.log('Loading Earth texture:', (progress.loaded / progress.total * 100) + '%');
+                },
+                function(error) {
+                    console.log('Failed to load Earth texture, using procedural fallback');
+                }
+            );
+            
+            // If the texture fails to load, it will fall back to a much more detailed procedural texture
+            if (!earthTexture.image) {
+                return createDetailedProceduralEarth();
+            }
+            
+            return earthTexture;
+        }
+
+        // Create detailed procedural Earth texture as fallback
+        function createDetailedProceduralEarth() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // Ocean base with depth variation
+            const oceanGradient = ctx.createRadialGradient(256, 128, 0, 256, 128, 400);
+            oceanGradient.addColorStop(0, '#1e40af');
+            oceanGradient.addColorStop(0.3, '#2563eb');
+            oceanGradient.addColorStop(0.6, '#1d4ed8');
+            oceanGradient.addColorStop(1, '#1e3a8a');
+            ctx.fillStyle = oceanGradient;
+            ctx.fillRect(0, 0, 1024, 512);
+
+            // Add ocean texture
+            for (let i = 0; i < 500; i++) {
+                ctx.fillStyle = `rgba(30, 64, 175, ${Math.random() * 0.3})`;
+                ctx.fillRect(Math.random() * 1024, Math.random() * 512, 2, 2);
+            }
+
+            // More detailed continents with better shapes and colors
+            const continentColors = ['#16a34a', '#15803d', '#166534', '#14532d'];
+            
+            // North America
+            ctx.fillStyle = continentColors[0];
+            ctx.beginPath();
+            ctx.ellipse(150, 150, 60, 80, -0.2, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(120, 200, 40, 50, 0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // South America
+            ctx.fillStyle = continentColors[1];
+            ctx.beginPath();
+            ctx.ellipse(180, 300, 30, 90, 0.1, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Africa
+            ctx.fillStyle = continentColors[2];
+            ctx.beginPath();
+            ctx.ellipse(520, 280, 50, 100, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Europe
+            ctx.fillStyle = continentColors[0];
+            ctx.beginPath();
+            ctx.ellipse(500, 150, 35, 40, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Asia
+            ctx.fillStyle = continentColors[3];
+            ctx.beginPath();
+            ctx.ellipse(700, 180, 80, 70, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(650, 120, 50, 40, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Australia
+            ctx.fillStyle = continentColors[1];
+            ctx.beginPath();
+            ctx.ellipse(780, 350, 35, 25, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Add mountain ranges (darker green)
+            ctx.fillStyle = '#14532d';
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * 1024;
+                const y = Math.random() * 512;
+                ctx.beginPath();
+                ctx.ellipse(x, y, Math.random() * 15 + 5, Math.random() * 10 + 3, Math.random() * Math.PI, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            // Add ice caps
+            ctx.fillStyle = '#f8fafc';
+            ctx.beginPath();
+            ctx.ellipse(512, 30, 100, 20, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(512, 482, 120, 25, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // Create realistic clouds texture
+        function createCloudsTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // Transparent base
+            ctx.clearRect(0, 0, 1024, 512);
+
+            // Create realistic cloud formations
+            const cloudFormations = [
+                // Tropical clouds
+                { x: 150, y: 400, width: 200, height: 80, opacity: 0.7 },
+                { x: 300, y: 350, width: 150, height: 60, opacity: 0.6 },
+                // Mid-latitude clouds
+                { x: 500, y: 200, width: 300, height: 100, opacity: 0.8 },
+                { x: 400, y: 150, width: 200, height: 70, opacity: 0.5 },
+                // Polar clouds
+                { x: 200, y: 50, width: 250, height: 60, opacity: 0.9 },
+                { x: 600, y: 450, width: 300, height: 50, opacity: 0.8 },
+                // Random scattered clouds
+                { x: 50, y: 250, width: 120, height: 40, opacity: 0.6 },
+                { x: 750, y: 300, width: 180, height: 50, opacity: 0.7 },
+                { x: 850, y: 180, width: 140, height: 45, opacity: 0.5 }
+            ];
+
+            cloudFormations.forEach(cloud => {
+                const gradient = ctx.createRadialGradient(
+                    cloud.x + cloud.width/2, cloud.y + cloud.height/2, 0,
+                    cloud.x + cloud.width/2, cloud.y + cloud.height/2, cloud.width/2
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${cloud.opacity})`);
+                gradient.addColorStop(0.7, `rgba(255, 255, 255, ${cloud.opacity * 0.5})`);
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
+            });
+
+            // Add some wispy cirrus clouds
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 30; i++) {
+                const x = Math.random() * 1024;
+                const y = Math.random() * 512;
+                const length = Math.random() * 100 + 20;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + length, y + (Math.random() - 0.5) * 20);
+                ctx.stroke();
+            }
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // Date calculation functions
+        const monthsData = [
+            { name: 'January', days: 31 },
+            { name: 'February', days: 28 }, // Non-leap year for simplicity
+            { name: 'March', days: 31 },
+            { name: 'April', days: 30 },
+            { name: 'May', days: 31 },
+            { name: 'June', days: 30 },
+            { name: 'July', days: 31 },
+            { name: 'August', days: 31 },
+            { name: 'September', days: 30 },
+            { name: 'October', days: 31 },
+            { name: 'November', days: 30 },
+            { name: 'December', days: 31 }
+        ];
+
+        function calculateDateFromAngle(angle) {
+            // Normalize angle to 0-360 range
+            const normalizedAngle = ((angle % 360) + 360) % 360;
+            
+            // Map 360° to 365 days (approximately 0.986° per day)
+            const dayOfYear = Math.floor((normalizedAngle / 360) * 365) + 1;
+            
+            // Convert day of year to month and day
+            let remainingDays = dayOfYear;
+            let month = 1;
+            let day = 1;
+            
+            for (let i = 0; i < monthsData.length; i++) {
+                if (remainingDays <= monthsData[i].days) {
+                    month = i + 1;
+                    day = remainingDays;
+                    break;
+                }
+                remainingDays -= monthsData[i].days;
+            }
+            
+            // Calculate correct day of week for current year
+            const currentYear = new Date().getFullYear();
+            const actualDate = new Date(currentYear, month - 1, day); // month is 0-indexed in Date()
+            const dayOfWeek = actualDate.getDay(); // 0=Sunday, 1=Monday, etc.
+            
+            // Log the day of week resolution
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            console.log(`Date resolution: ${monthsData[month - 1].name} ${day}, ${currentYear} → ${dayNames[dayOfWeek]} (dayOfWeek: ${dayOfWeek})`);
+            
+            return { 
+                month: month, 
+                day: day, 
+                dayOfWeek: dayOfWeek, // 0=Sunday, 1=Monday, etc.
+                monthName: monthsData[month - 1].name,
+                year: currentYear
+            };
+        }
+
+        function formatDate(dateObj) {
+            if (!dateObj) return "January 1";
+            
+            return `${dateObj.monthName} ${dateObj.day}`;
+        }
+
+        function updateDateDisplay() {
+            const dateObj = calculateDateFromAngle(earthOrbitAngle);
+            selectedDate = dateObj;
+            const dateDisplay = document.getElementById('date-display');
+            if (dateDisplay) {
+                dateDisplay.textContent = formatDate(dateObj);
+            }
+        }
+
+        // Orbital drag mechanics
+        function initializeEarthOrbit() {
+            let isDragging = false;
+            let startAngle = 0;
+            let centerX = 0;
+            let centerY = 0;
+            
+            const earthOrbit = document.getElementById('earth-date');
+            const solarSystem = document.querySelector('.solar-system');
+            if (!earthOrbit || !solarSystem) return;
+            
+            function getAngleFromCenter(clientX, clientY) {
+                const rect = solarSystem.getBoundingClientRect();
+                centerX = rect.left + rect.width / 2;
+                centerY = rect.top + rect.height / 2;
+                
+                const deltaX = clientX - centerX;
+                const deltaY = clientY - centerY;
+                
+                // Calculate angle in degrees (0° at top, clockwise)
+                let angle = Math.atan2(deltaX, -deltaY) * (180 / Math.PI);
+                if (angle < 0) angle += 360;
+                
+                return angle;
+            }
+            
+            function updateEarthPosition(angle) {
+                // Responsive radius based on screen size to match CSS orbit paths
+                let radius = 150; // Desktop default
+                if (window.innerWidth <= 480) {
+                    radius = 105; // Small mobile (210px orbit diameter / 2)
+                } else if (window.innerWidth <= 768) {
+                    radius = 120; // Tablet/large mobile (240px orbit diameter / 2)
+                }
+                
+                const radians = (angle - 90) * (Math.PI / 180); // Convert to radians, adjust for CSS positioning
+                
+                const x = centerX - solarSystem.getBoundingClientRect().left + Math.cos(radians) * radius - 15; // -15 for half Earth width
+                const y = centerY - solarSystem.getBoundingClientRect().top + Math.sin(radians) * radius - 15;
+                
+                earthOrbit.style.left = `${x}px`;
+                earthOrbit.style.top = `${y}px`;
+            }
+            
+            function getEventCoordinates(event) {
+                if (event.type.includes('touch')) {
+                    return {
+                        clientX: event.touches[0].clientX,
+                        clientY: event.touches[0].clientY
+                    };
+                }
+                return {
+                    clientX: event.clientX,
+                    clientY: event.clientY
+                };
+            }
+            
+            function startDrag(event) {
+                event.preventDefault();
+                isDragging = true;
+                const coords = getEventCoordinates(event);
+                startAngle = getAngleFromCenter(coords.clientX, coords.clientY);
+                earthOrbit.style.cursor = 'grabbing';
+            }
+            
+            function handleDrag(event) {
+                if (!isDragging) return;
+                event.preventDefault();
+                
+                const coords = getEventCoordinates(event);
+                earthOrbitAngle = getAngleFromCenter(coords.clientX, coords.clientY);
+                
+                // Update Earth orbital position
+                updateEarthPosition(earthOrbitAngle);
+                
+                // Update date display
+                updateDateDisplay();
+            }
+            
+            function stopDrag() {
+                isDragging = false;
+                earthOrbit.style.cursor = 'grab';
+            }
+            
+            // Mouse events
+            earthOrbit.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', stopDrag);
+            
+            // Touch events
+            earthOrbit.addEventListener('touchstart', startDrag);
+            document.addEventListener('touchmove', handleDrag);
+            document.addEventListener('touchend', stopDrag);
+            
+            // Initialize position and display
+            const rect = solarSystem.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+            updateEarthPosition(earthOrbitAngle);
+            updateDateDisplay();
+        }
+
+        // Comprehensive pricing logic system
+        const priceMatrix = {
+            lunch: {
+                weekday: { adult: 25.50, child: 14.95 },
+                weekend: { adult: 27.50, child: 16.95 }
+            },
+            dinner: {
+                weekday: { adult: 35.99, child: 20.95 },
+                weekend: { adult: 37.99, child: 22.95 }
+            }
+        };
+
+        function determinePricingPeriod(timeObj) {
+            if (!timeObj) return 'dinner'; // Default fallback
+            
+            const { hours } = timeObj;
+            // Lunch: 12:00am - 2:59pm (0-14), Dinner: 3:00pm - 11:59pm (15-23)
+            return hours < 15 ? 'lunch' : 'dinner';
+        }
+
+        function getDayCategory(dateObj, timeObj) {
+            if (!dateObj) return 'weekday'; // Default fallback
+            
+            const period = determinePricingPeriod(timeObj);
+            const { dayOfWeek } = dateObj; // 0=Sunday, 1=Monday, ..., 6=Saturday
+            
+            if (period === 'lunch') {
+                // Lunch: Mon-Fri vs Sat-Sun
+                return (dayOfWeek >= 1 && dayOfWeek <= 5) ? 'weekday' : 'weekend';
+            } else {
+                // Dinner: Sun-Thu vs Fri-Sat
+                return (dayOfWeek >= 0 && dayOfWeek <= 4) ? 'weekday' : 'weekend';
+            }
+        }
+
+        function calculateYamatoPrice(selectedDate, selectedTime, heightInFeet, saschaPresent, taftPresent) {
+            console.log("=== YAMATO PRICE CALCULATION DEBUG ===");
+            console.log("Input parameters:");
+            console.log("  Date:", selectedDate ? `${selectedDate.monthName} ${selectedDate.day}` : "null");
+            console.log("  Time:", selectedTime ? `${selectedTime.hours}:${selectedTime.minutes.toString().padStart(2, '0')}` : "null");
+            console.log("  Height:", heightInFeet, "feet");
+            console.log("  Sascha present:", saschaPresent);
+            console.log("  Taft present:", taftPresent);
+            
+            // Handle infinite Yamatos case
+            if (heightInFeet < 3) {
+                console.log("Height < 3 feet → INFINITE YAMATOS");
+                console.log("=== END CALCULATION ===");
+                return { isInfinite: true, finalPrice: 0 };
+            }
+            
+            const period = determinePricingPeriod(selectedTime);
+            const dayCategory = getDayCategory(selectedDate, selectedTime);
+            
+            console.log("Determined pricing period:", period);
+            console.log("Determined day category:", dayCategory);
+            if (selectedDate) {
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                console.log("Day of week:", dayNames[selectedDate.dayOfWeek]);
+            }
+            
+            // Get base prices from matrix
+            const prices = priceMatrix[period][dayCategory];
+            console.log("Available prices for", period, dayCategory + ":");
+            console.log("  Adult:", prices.adult);
+            console.log("  Child:", prices.child);
+            
+            let basePrice = 0;
+            let heightCategory = "";
+            
+            // Apply height-based pricing rules
+            if (heightInFeet >= 3 && heightInFeet < 4) {
+                // 3-4 feet: Half of child price
+                basePrice = prices.child * 0.5;
+                heightCategory = "3-4 feet (half child price)";
+                console.log("Height category: 3-4 feet → Half child price");
+                console.log("Calculation:", prices.child, "× 0.5 =", basePrice);
+            } else if (heightInFeet >= 4 && heightInFeet <= 5) {
+                // 4-5 feet: Full child price
+                basePrice = prices.child;
+                heightCategory = "4-5 feet (full child price)";
+                console.log("Height category: 4-5 feet → Full child price");
+                console.log("Base price:", basePrice);
+            } else {
+                // 5+ feet: Adult price
+                basePrice = prices.adult;
+                heightCategory = "5+ feet (adult price)";
+                console.log("Height category: 5+ feet → Adult price");
+                console.log("Base price:", basePrice);
+            }
+            
+            // Apply penalties
+            let penalties = 0;
+            console.log("Penalties:");
+            if (saschaPresent) {
+                penalties += 20;
+                console.log("  Sascha present: +$20");
+            }
+            if (taftPresent) {
+                penalties += 20;
+                console.log("  Taft present: +$20");
+            }
+            console.log("  Total penalties: $" + penalties);
+            
+            const priceWithPenalties = basePrice + penalties;
+            console.log("Price with penalties:", basePrice, "+", penalties, "=", priceWithPenalties);
+            
+            // Apply tax (7%) and tip (18%) as before
+            const taxAmount = priceWithPenalties * 0.07;
+            const tipAmount = priceWithPenalties * 0.18;
+            const finalPrice = priceWithPenalties + taxAmount + tipAmount;
+            
+            console.log("Tax and tip calculation:");
+            console.log("  Tax (7%):", priceWithPenalties, "× 0.07 =", taxAmount.toFixed(2));
+            console.log("  Tip (18%):", priceWithPenalties, "× 0.18 =", tipAmount.toFixed(2));
+            console.log("  Final price:", priceWithPenalties, "+", taxAmount.toFixed(2), "+", tipAmount.toFixed(2), "=", finalPrice.toFixed(2));
+            
+            console.log("=== END CALCULATION ===");
+            
+            return { 
+                isInfinite: false, 
+                finalPrice, 
+                basePrice, 
+                penalties, 
+                period, 
+                dayCategory, 
+                heightCategory,
+                taxAmount,
+                tipAmount,
+                priceWithPenalties
+            };
+        }
         
         function shuffleArray(array) {
             const shuffled = [...array];
@@ -209,7 +1205,9 @@
         document.getElementById('sascha-checkbox').addEventListener('change', updateDollarDisplay);
         document.getElementById('taft-checkbox').addEventListener('change', updateDollarDisplay);
         
+        // New UI flow for convert button
         document.getElementById('convert').addEventListener('click', () => {
+            // Step 1: Get height input (preserve existing prompts)
             const feet = prompt("How many feet tall are you?");
             
             if (feet === null || feet === '') {
@@ -236,79 +1234,169 @@
                 return;
             }
             
-            const heightInFeet = feetNum + (inchesNum / 12);
+            heightInFeet = feetNum + (inchesNum / 12);
             
+            // Step 2: Show first countdown then open time selection modal
+            let countdown = 5;
+            const resultDiv = document.getElementById('result');
+            
+            function firstCountdown() {
+                if (countdown > 1) {
+                    resultDiv.innerHTML = `Calculating your Yamatos in ${countdown}`;
+                    countdown--;
+                    setTimeout(firstCountdown, 1000);
+                } else {
+                    resultDiv.textContent = '';
+                    showTimeModal();
+                }
+            }
+            
+            firstCountdown();
+        });
+
+        // Modal management functions
+        function showTimeModal() {
+            currentModalStep = 'time';
+            document.getElementById('modal-backdrop').style.display = 'flex';
+            document.getElementById('time-modal').style.display = 'block';
+            document.getElementById('date-modal').style.display = 'none';
+            
+            // Initialize Earth rotation interaction
+            setTimeout(() => {
+                initializeEarthRotation();
+            }, 100);
+        }
+
+        function showDateModal() {
+            currentModalStep = 'date';
+            document.getElementById('time-modal').style.display = 'none';
+            document.getElementById('date-modal').style.display = 'block';
+            
+            // Initialize Earth orbit interaction
+            setTimeout(() => {
+                initializeEarthOrbit();
+            }, 100);
+        }
+
+        function hideModals() {
+            currentModalStep = null;
+            document.getElementById('modal-backdrop').style.display = 'none';
+            document.getElementById('time-modal').style.display = 'none';
+            document.getElementById('date-modal').style.display = 'none';
+            
+            // Clean up Three.js resources properly
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            if (earthRenderer) {
+                const container = document.getElementById('earth-3d-container');
+                if (container && container.contains(earthRenderer.domElement)) {
+                    container.removeChild(earthRenderer.domElement);
+                }
+                earthRenderer.dispose();
+                earthRenderer = null;
+            }
+            
+            if (earthScene) {
+                earthScene = null;
+            }
+            
+            // Reset mesh references
+            earthMesh = null;
+            cloudsMesh = null;
+        }
+
+        function finalCalculation() {
+            console.log("=== FINAL YAMATO CALCULATION DEBUG ===");
+            
+            // Calculate bank balance
+            console.log("Calculating bank balance from sliders:");
             let amount = '';
             const sliders = document.querySelectorAll('.slider');
-            sliders.forEach(slider => {
+            sliders.forEach((slider, index) => {
                 const isFirst = slider.dataset.first === 'true';
                 const order = isFirst ? firstDigitOrder : digitOrder;
                 const value = parseInt(slider.value);
-                amount += order[value];
+                const digit = order[value];
+                console.log(`  Slider ${index + 1} (${isFirst ? 'first' : 'regular'}): position ${value} → digit ${digit}`);
+                amount += digit;
             });
             
             let totalAmount = parseFloat(amount);
+            console.log("Base amount from sliders: $" + totalAmount);
             
             if (hasCents) {
                 const centsSelect = document.getElementById('cents-select');
                 if (centsSelect.value !== '') {
-                    totalAmount += parseFloat(centsSelect.value) / 100;
+                    const centsValue = parseFloat(centsSelect.value) / 100;
+                    console.log("Adding cents:", centsSelect.value, "→ $" + centsValue.toFixed(2));
+                    totalAmount += centsValue;
                 }
             }
             
-            const currentDay = new Date().getDay();
-            const isFridayOrSaturday = currentDay === 5 || currentDay === 6;
+            console.log("Total bank balance: $" + totalAmount.toFixed(2));
             
-            let divisor;
-            let resultText;
-            
+            // Get penalty states
             const saschaChecked = document.getElementById('sascha-checkbox').checked;
             const taftChecked = document.getElementById('taft-checkbox').checked;
-            let penalties = 0;
-            if (saschaChecked) penalties += 20;
-            if (taftChecked) penalties += 20;
             
-            if (heightInFeet < 3) {
+            console.log("Selected date and time:");
+            console.log("  Date:", selectedDate ? `${selectedDate.monthName} ${selectedDate.day}` : "null");
+            console.log("  Time:", selectedTime ? `${selectedTime.hours}:${selectedTime.minutes.toString().padStart(2, '0')}` : "null");
+            console.log("  Height:", heightInFeet, "feet");
+            
+            // Calculate price using new comprehensive system
+            const priceResult = calculateYamatoPrice(selectedDate, selectedTime, heightInFeet, saschaChecked, taftChecked);
+            
+            let resultText;
+            if (priceResult.isInfinite) {
+                console.log("Result: INFINITE YAMATOS (height < 3 feet)");
                 resultText = "You have infinite Yamatos";
-            } else if (heightInFeet >= 3 && heightInFeet < 4) {
-                const basePrice = (isFridayOrSaturday ? 11.475 : 10.475) + penalties;
-                divisor = basePrice * 1.07 + basePrice * 0.18;
-                const yamatos = totalAmount / divisor;
-                resultText = `You have ${yamatos.toFixed(4)} Yamatos`;
-            } else if (heightInFeet >= 4 && heightInFeet <= 5) {
-                const basePrice = (isFridayOrSaturday ? 22.95 : 20.95) + penalties;
-                divisor = basePrice * 1.07 + basePrice * 0.18;
-                const yamatos = totalAmount / divisor;
-                resultText = `You have ${yamatos.toFixed(4)} Yamatos`;
             } else {
-                const basePrice = (isFridayOrSaturday ? 37.99 : 35.99) + penalties;
-                divisor = basePrice * 1.07 + basePrice * 0.18;
-                const yamatos = totalAmount / divisor;
+                console.log("=== FINAL DIVISION ===");
+                console.log("Bank balance: $" + totalAmount.toFixed(2));
+                console.log("Final Yamato price: $" + priceResult.finalPrice.toFixed(2));
+                console.log("Division: " + totalAmount.toFixed(2) + " ÷ " + priceResult.finalPrice.toFixed(2));
+                
+                const yamatos = totalAmount / priceResult.finalPrice;
+                console.log("Result: " + yamatos.toFixed(4) + " Yamatos");
+                
                 resultText = `You have ${yamatos.toFixed(4)} Yamatos`;
             }
             
+            console.log("=== END FINAL CALCULATION ===");
+            
+            // Show second countdown then final result
             let countdown = 5;
-            let isFirstCountdown = true;
             const resultDiv = document.getElementById('result');
             
-            function updateCountdown() {
+            function secondCountdown() {
                 if (countdown > 1) {
-                    const message = isFirstCountdown ? 'Calculating your Yamatos' : '...crunching numbers...';
-                    resultDiv.innerHTML = `${message}<br>${countdown}`;
+                    resultDiv.innerHTML = `crunching numbers... ${countdown}`;
                     countdown--;
-                    setTimeout(updateCountdown, 1000);
+                    setTimeout(secondCountdown, 1000);
                 } else {
-                    if (isFirstCountdown) {
-                        isFirstCountdown = false;
-                        countdown = 5;
-                        updateCountdown();
-                    } else {
-                        resultDiv.textContent = resultText;
-                    }
+                    resultDiv.textContent = resultText;
                 }
             }
             
-            updateCountdown();
+            secondCountdown();
+        }
+
+        // Confirmation button handlers
+        document.getElementById('confirm-time').addEventListener('click', () => {
+            if (selectedTime) {
+                showDateModal();
+            }
+        });
+
+        document.getElementById('confirm-date').addEventListener('click', () => {
+            if (selectedDate) {
+                hideModals();
+                finalCalculation();
+            }
         });
         
         document.querySelector('.slider').addEventListener('input', (e) => {
@@ -317,6 +1405,89 @@
         });
         
         updateDollarDisplay();
+
+        // Test scenarios for verification (run in console)
+        window.testScenarios = function() {
+            console.log("=== Testing Pricing Logic ===");
+            console.log("Current year:", new Date().getFullYear());
+            
+            // Test day of week calculation accuracy
+            console.log("=== Day of Week Verification ===");
+            const testAngles = [0, 90, 180, 270]; // Different positions around the orbit
+            testAngles.forEach(angle => {
+                const dateObj = calculateDateFromAngle(angle);
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                console.log(`Angle ${angle}°: ${dateObj.monthName} ${dateObj.day}, ${dateObj.year} = ${dayNames[dateObj.dayOfWeek]}`);
+            });
+            
+            // Test with known dates for current year
+            console.log("=== Known Date Tests ===");
+            // Find angle that produces a specific date and verify day of week
+            for (let angle = 0; angle < 360; angle += 30) {
+                const dateObj = calculateDateFromAngle(angle);
+                if (dateObj.month === 1 && dateObj.day === 1) {
+                    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    console.log(`January 1, ${dateObj.year} = ${dayNames[dateObj.dayOfWeek]}`);
+                    break;
+                }
+            }
+            
+            // Test Scenario 1: Find a Tuesday in the current year for testing
+            let tuesdayDate = null;
+            for (let angle = 0; angle < 360; angle += 5) {
+                const dateObj = calculateDateFromAngle(angle);
+                if (dateObj.dayOfWeek === 2) { // Tuesday
+                    tuesdayDate = dateObj;
+                    break;
+                }
+            }
+            
+            if (tuesdayDate) {
+                const testTime1 = { hours: 14, minutes: 0 }; // 2:00 PM
+                const result1 = calculateYamatoPrice(tuesdayDate, testTime1, 4.417, false, false); // 4ft 5in = 4.417 feet
+                console.log("Scenario 1 (Tuesday lunch):", result1);
+                console.log("Date used:", tuesdayDate.monthName, tuesdayDate.day);
+                console.log("Expected final price: ~$18.89, Actual:", result1.finalPrice.toFixed(2));
+            }
+            
+            // Test Scenario 2: Find a Saturday in the current year for testing
+            let saturdayDate = null;
+            for (let angle = 0; angle < 360; angle += 5) {
+                const dateObj = calculateDateFromAngle(angle);
+                if (dateObj.dayOfWeek === 6) { // Saturday
+                    saturdayDate = dateObj;
+                    break;
+                }
+            }
+            
+            if (saturdayDate) {
+                const testTime2 = { hours: 20, minutes: 0 }; // 8:00 PM
+                const result2 = calculateYamatoPrice(saturdayDate, testTime2, 5.167, true, false); // 5ft 2in = 5.167 feet
+                console.log("Scenario 2 (Saturday dinner):", result2);
+                console.log("Date used:", saturdayDate.monthName, saturdayDate.day);
+                console.log("Expected final price: ~$73.29, Actual:", result2.finalPrice.toFixed(2));
+            }
+            
+            // Additional edge case tests
+            console.log("=== Edge Case Tests ===");
+            const anyDate = calculateDateFromAngle(45);
+            
+            // Under 3 feet (infinite Yamatos)
+            const resultInfinite = calculateYamatoPrice(anyDate, { hours: 14, minutes: 0 }, 2.9, false, false);
+            console.log("Under 3 feet:", resultInfinite);
+            
+            // Exactly 3 feet (half child price)
+            const result3feet = calculateYamatoPrice(anyDate, { hours: 14, minutes: 0 }, 3.0, false, false);
+            console.log("Exactly 3 feet:", result3feet);
+            
+            // Lunch vs Dinner boundary (2:59 PM vs 3:00 PM)
+            const lunchBoundary = calculateYamatoPrice(anyDate, { hours: 14, minutes: 59 }, 5.0, false, false);
+            const dinnerBoundary = calculateYamatoPrice(anyDate, { hours: 15, minutes: 0 }, 5.0, false, false);
+            console.log("Lunch boundary (2:59 PM):", lunchBoundary);
+            console.log("Dinner boundary (3:00 PM):", dinnerBoundary);
+        };
+        
+        console.log("Run testScenarios() in the console to verify pricing logic");
     </script>
 </body>
 </html>

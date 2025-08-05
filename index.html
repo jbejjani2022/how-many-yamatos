@@ -213,32 +213,153 @@
         }
 
         /* Mobile Responsiveness */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 30px;
+            }
+            
             .modal-content {
-                padding: 20px;
-                margin: 20px;
+                padding: 15px;
+                margin: 10px;
+                max-width: 95%;
+                width: 95%;
+            }
+            
+            .modal-content h2 {
+                font-size: 2em;
+                margin-bottom: 15px;
             }
             
             .earth-container {
-                width: 250px;
-                height: 250px;
+                width: 280px;
+                height: 280px;
             }
             
             #earth-3d-container {
-                width: 250px;
-                height: 250px;
+                width: 280px;
+                height: 280px;
+            }
+            
+            .time-display, .date-display {
+                font-size: 1.8em;
+                margin-top: 15px;
             }
             
             .solar-system {
-                width: 300px;
-                height: 300px;
+                width: 320px;
+                height: 320px;
+                margin: 30px auto 20px auto;
             }
             
             .orbit-path {
-                width: 225px;
-                height: 225px;
-                top: 37.5px;
-                left: 37.5px;
+                width: 240px;
+                height: 240px;
+                top: 40px;
+                left: 40px;
+            }
+            
+            .earth-orbit {
+                top: 25px;
+                left: 160px;
+            }
+            
+            #confirm-time, #confirm-date {
+                padding: 15px 25px;
+                font-size: 1.1em;
+            }
+            
+            .slider-container {
+                margin: 15px 0;
+                gap: 8px;
+            }
+            
+            .slider {
+                width: 150px;
+            }
+            
+            .digit-display {
+                font-size: 1.8em;
+                min-width: 35px;
+            }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+                margin-bottom: 20px;
+            }
+            
+            .modal-content {
+                padding: 10px;
+                margin: 5px;
+            }
+            
+            .modal-content h2 {
+                font-size: 1.8em;
+            }
+            
+            .earth-container {
+                width: 240px;
+                height: 240px;
+            }
+            
+            #earth-3d-container {
+                width: 240px;
+                height: 240px;
+            }
+            
+            .time-display, .date-display {
+                font-size: 1.6em;
+            }
+            
+            .solar-system {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .orbit-path {
+                width: 210px;
+                height: 210px;
+                top: 35px;
+                left: 35px;
+            }
+            
+            .earth-orbit {
+                top: 20px;
+                left: 140px;
+            }
+            
+            #confirm-time, #confirm-date {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            
+            .slider {
+                width: 120px;
+            }
+            
+            .digit-display {
+                font-size: 1.6em;
+                min-width: 30px;
+            }
+            
+            .dollar-amount {
+                font-size: 1.2em;
+            }
+            
+            .result {
+                font-size: 1.3em;
             }
         }
     </style>
@@ -361,6 +482,7 @@
         let isDragging = false;
         let startX = 0;
         let startAngle = 0;
+        let animationId = null; // Track animation frame
 
         function initializeEarthRotation() {
             const container = document.getElementById('earth-3d-container');
@@ -372,8 +494,14 @@
             earthRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             
             // Responsive sizing
-            const isMobile = window.innerWidth <= 600;
-            const size = isMobile ? 250 : 300;
+            const isSmallMobile = window.innerWidth <= 480;
+            const isMobile = window.innerWidth <= 768;
+            let size = 300; // Desktop default
+            if (isSmallMobile) {
+                size = 240;
+            } else if (isMobile) {
+                size = 280;
+            }
             earthRenderer.setSize(size, size);
             earthRenderer.shadowMap.enabled = true;
             earthRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -480,10 +608,15 @@
 
             // Animation loop
             function animate() {
-                requestAnimationFrame(animate);
+                // Check if renderer still exists before continuing
+                if (!earthRenderer || !earthScene || !earthCamera) {
+                    return; // Stop animation if components are disposed
+                }
+                
+                animationId = requestAnimationFrame(animate);
                 
                 // Very slow automatic rotation when not being dragged
-                if (!isDragging) {
+                if (!isDragging && earthMesh && cloudsMesh) {
                     earthRotationAngle += 0.05; // Much slower rotation in degrees
                     const rotationInRadians = (earthRotationAngle * Math.PI) / 180;
                     earthMesh.rotation.y = rotationInRadians;
@@ -770,7 +903,14 @@
             }
             
             function updateEarthPosition(angle) {
-                const radius = 150; // Distance from center to Earth orbit
+                // Responsive radius based on screen size to match CSS orbit paths
+                let radius = 150; // Desktop default
+                if (window.innerWidth <= 480) {
+                    radius = 105; // Small mobile (210px orbit diameter / 2)
+                } else if (window.innerWidth <= 768) {
+                    radius = 120; // Tablet/large mobile (240px orbit diameter / 2)
+                }
+                
                 const radians = (angle - 90) * (Math.PI / 180); // Convert to radians, adjust for CSS positioning
                 
                 const x = centerX - solarSystem.getBoundingClientRect().left + Math.cos(radians) * radius - 15; // -15 for half Earth width
@@ -1144,7 +1284,12 @@
             document.getElementById('time-modal').style.display = 'none';
             document.getElementById('date-modal').style.display = 'none';
             
-            // Clean up Three.js resources
+            // Clean up Three.js resources properly
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
             if (earthRenderer) {
                 const container = document.getElementById('earth-3d-container');
                 if (container && container.contains(earthRenderer.domElement)) {
@@ -1153,9 +1298,14 @@
                 earthRenderer.dispose();
                 earthRenderer = null;
             }
+            
             if (earthScene) {
                 earthScene = null;
             }
+            
+            // Reset mesh references
+            earthMesh = null;
+            cloudsMesh = null;
         }
 
         function finalCalculation() {
